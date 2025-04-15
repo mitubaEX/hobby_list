@@ -1,5 +1,8 @@
-import { VStack, Box, Text, Badge, HStack, Select as ChakraSelect, Divider, Button } from '@chakra-ui/react'
-import { useState, useEffect, ChangeEvent } from 'react'
+import { VStack, Box, Text, Badge, HStack, Select as ChakraSelect, Divider, Button,
+  Menu, MenuButton, MenuList, MenuItem, IconButton, useDisclosure, AlertDialog,
+  AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent,
+  AlertDialogOverlay } from '@chakra-ui/react'
+import { useState, useEffect, ChangeEvent, useRef } from 'react'
 import hobbiesData from '../assets/hobbies.json'
 import { ProgressBar } from './ProgressBar'
 import { SearchBar } from './SearchBar'
@@ -7,6 +10,7 @@ import { CategoryProgress } from './CategoryProgress'
 import { AddHobbyForm } from './AddHobbyForm'
 import { DataManager } from './DataManager'
 import { HobbyItem, HobbyStatus } from '../types/hobbies'
+import { HamburgerIcon } from '@chakra-ui/icons'
 
 type Hobby = {
   category: string
@@ -23,6 +27,8 @@ export const HobbyList = () => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string>('全て')
   const [selectedStatus, setSelectedStatus] = useState<HobbyStatus | '全て'>('全て')
+  const { isOpen, onOpen, onClose } = useDisclosure()
+  const cancelRef = useRef<HTMLButtonElement>(null)
 
   // データの読み込み
   useEffect(() => {
@@ -142,19 +148,21 @@ export const HobbyList = () => {
       
       // カスタム趣味を更新
       const savedCustomHobbies = localStorage.getItem(CUSTOM_HOBBIES_KEY)
-      if (savedCustomHobbies) {
-        const customHobbies: Hobby[] = JSON.parse(savedCustomHobbies)
-        const existingCustomCategory = customHobbies.find(h => h.category === category)
-        
-        if (existingCustomCategory) {
-          // 既存のカスタムカテゴリを更新
-          const updatedCustomHobbies = customHobbies.map(h =>
-            h.category === category
-              ? { ...h, items: [...new Set([...h.items, name])].sort((a, b) => a.localeCompare(b, 'ja')) }
-              : h
-          )
-          localStorage.setItem(CUSTOM_HOBBIES_KEY, JSON.stringify(updatedCustomHobbies))
-        }
+      const customHobbies: Hobby[] = savedCustomHobbies ? JSON.parse(savedCustomHobbies) : []
+      const existingCustomCategory = customHobbies.find(h => h.category === category)
+      
+      if (existingCustomCategory) {
+        // 既存のカスタムカテゴリを更新
+        const updatedCustomHobbies = customHobbies.map(h =>
+          h.category === category
+            ? { ...h, items: [...new Set([...h.items, name])].sort((a, b) => a.localeCompare(b, 'ja')) }
+            : h
+        )
+        localStorage.setItem(CUSTOM_HOBBIES_KEY, JSON.stringify(updatedCustomHobbies))
+      } else {
+        // 新しいカスタム趣味として追加
+        customHobbies.push({ category, items: [name] })
+        localStorage.setItem(CUSTOM_HOBBIES_KEY, JSON.stringify(customHobbies))
       }
     }
   }
@@ -206,14 +214,80 @@ export const HobbyList = () => {
 
   const categories = ['全て', ...hobbies.map(hobby => hobby.category)]
 
+  const handleReset = () => {
+    // localStorageをクリア
+    localStorage.removeItem(COMPLETED_HOBBIES_KEY)
+    localStorage.removeItem(CUSTOM_HOBBIES_KEY)
+
+    // 状態をリセット
+    const initialHobbies = [...hobbiesData.hobbies].sort((a, b) => a.category.localeCompare(b.category, 'ja'))
+    const initialItems = hobbiesData.hobbies.flatMap(hobby =>
+      hobby.items.map(item => ({
+        name: item,
+        status: '未着手' as HobbyStatus
+      }))
+    )
+
+    setHobbies(initialHobbies)
+    setHobbyItems(initialItems)
+    setSelectedCategory('全て')
+    setSelectedStatus('全て')
+    setSearchQuery('')
+    onClose()
+  }
+
   return (
     <VStack gap={4} align="stretch">
       <HStack justify="space-between">
-        <SearchBar onSearch={handleSearch} />
-        <Button colorScheme="blue" onClick={() => setIsAddModalOpen(true)}>
-          趣味を追加
-        </Button>
+        <HStack spacing={4} flex={1}>
+          <SearchBar onSearch={handleSearch} />
+          <Button colorScheme="blue" onClick={() => setIsAddModalOpen(true)}>
+            趣味を追加
+          </Button>
+        </HStack>
+        <Menu>
+          <MenuButton
+            as={IconButton}
+            aria-label="Options"
+            icon={<HamburgerIcon />}
+            variant="outline"
+          />
+          <MenuList>
+            <MenuItem onClick={onOpen} color="red.500">
+              全てリセット
+            </MenuItem>
+          </MenuList>
+        </Menu>
       </HStack>
+
+      <AlertDialog
+        isOpen={isOpen}
+        leastDestructiveRef={cancelRef}
+        onClose={onClose}
+      >
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              全てリセット
+            </AlertDialogHeader>
+
+            <AlertDialogBody>
+              全ての趣味の状態と追加したアイテムがリセットされます。この操作は取り消せません。
+              本当にリセットしますか？
+            </AlertDialogBody>
+
+            <AlertDialogFooter>
+              <Button ref={cancelRef} onClick={onClose}>
+                キャンセル
+              </Button>
+              <Button colorScheme="red" onClick={handleReset} ml={3}>
+                リセット
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
+      </AlertDialog>
+
       <HStack spacing={4}>
         <ChakraSelect
           value={selectedCategory}
