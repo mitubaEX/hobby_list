@@ -35,12 +35,17 @@ export const HobbyList = () => {
     const loadData = () => {
       // 初期データの設定
       const initialHobbies = [...hobbiesData.hobbies]
-      const initialItems: HobbyItem[] = hobbiesData.hobbies.flatMap(hobby =>
-        hobby.items.map(item => ({
-          name: item,
-          status: '未着手' as HobbyStatus
-        }))
-      )
+      let allItems = new Map<string, HobbyItem>()
+
+      // 初期アイテムを追加
+      hobbiesData.hobbies.forEach(hobby => {
+        hobby.items.forEach(item => {
+          allItems.set(item, {
+            name: item,
+            status: '未着手' as HobbyStatus
+          })
+        })
+      })
 
       // localStorageからカスタム趣味を読み込む
       const savedCustomHobbies = localStorage.getItem(CUSTOM_HOBBIES_KEY)
@@ -60,16 +65,17 @@ export const HobbyList = () => {
               items: [...customHobby.items].sort((a, b) => a.localeCompare(b, 'ja'))
             })
           }
-        })
 
-        // カスタムアイテムを追加
-        const customItems: HobbyItem[] = customHobbies.flatMap(hobby =>
-          hobby.items.map(item => ({
-            name: item,
-            status: '未着手' as HobbyStatus
-          }))
-        )
-        initialItems.push(...customItems)
+          // カスタムアイテムを追加
+          customHobby.items.forEach(item => {
+            if (!allItems.has(item)) {
+              allItems.set(item, {
+                name: item,
+                status: '未着手' as HobbyStatus
+              })
+            }
+          })
+        })
       }
 
       // カテゴリをソート
@@ -81,14 +87,15 @@ export const HobbyList = () => {
       if (savedCompletedHobbies) {
         const completedItems: HobbyItem[] = JSON.parse(savedCompletedHobbies)
         // 完了した趣味のステータスを更新
-        const updatedItems = initialItems.map(item => {
-          const savedItem = completedItems.find(ci => ci.name === item.name)
-          return savedItem ? savedItem : item
+        completedItems.forEach(item => {
+          if (allItems.has(item.name)) {
+            allItems.set(item.name, item)
+          }
         })
-        setHobbyItems(updatedItems)
-      } else {
-        setHobbyItems(initialItems)
       }
+
+      // MapからArrayに変換
+      setHobbyItems(Array.from(allItems.values()))
     }
     loadData()
   }, [])
