@@ -1,54 +1,53 @@
-# React + TypeScript + Vite
+# 趣味一覧を管理する Web アプリ
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+趣味の進捗管理や新しい趣味の発見をサポートするWebアプリケーションです。
 
-Currently, two official plugins are available:
+## 主な機能
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### 1. 趣味の管理
+- カテゴリ別に趣味を表示
+- 各趣味の進捗状況を管理（未着手・進行中・完了）
+- 趣味の検索機能
+- カテゴリや進捗状況でのフィルタリング
 
-## Expanding the ESLint configuration
+### 2. 進捗管理
+- 全体の進捗状況をプログレスバーで表示
+- カテゴリごとの進捗状況を表示
+- 各趣味のステータスを簡単に変更可能
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 3. データ管理
+- 新しい趣味の追加
+- データのエクスポート/インポート機能
+- データのリセット機能
+- ローカルストレージを使用したデータの永続化
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
-```
+### 4. カテゴリ
+- スポーツ
+- 観戦・観賞
+- 集める
+- 旅行・出かける
+- グルメ・料理
+- アウトドア
+- 作る
+- 育てる
+- 美容・ライフ
+- 音楽
+- 芸術・鑑賞
+- 踊る・ダンス
+- 遊ぶ・特技
+- 考える・ゲーム
+- 学ぶ
+- 稼ぐ
+- その他
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 技術スタック
+- React
+- TypeScript
+- Chakra UI
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 今後の予定
+- ユーザー認証機能の追加
+- モバイルUIのレスポンシブ対応の改善
+- 趣味の編集・削除機能の追加
+- データバックアップ機能の強化
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
