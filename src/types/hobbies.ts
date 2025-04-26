@@ -13,8 +13,3 @@ export type Hobby = {
 export type HobbiesData = {
   hobbies: Hobby[]
 }
-
-declare module '*.json' {
-  const value: HobbiesData
-  export default value
-} 
