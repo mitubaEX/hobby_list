@@ -3,7 +3,7 @@ import { VStack, Box, Text, Badge, HStack, Select as ChakraSelect, Divider, Butt
   AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent,
   AlertDialogOverlay } from '@chakra-ui/react'
 import { useState, useEffect, ChangeEvent, useRef } from 'react'
-import hobbiesData from '../assets/hobbies.json'
+import { hobbiesData } from '../data/hobbies'
 import { ProgressBar } from './ProgressBar'
 import { SearchBar } from './SearchBar'
 import { CategoryProgress } from './CategoryProgress'
